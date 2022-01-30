@@ -55,7 +55,7 @@ var intervalID =  setInterval(drawToCanvas, 2* (1000/{{ FPS }}));
 
 function takePic() {
   var imgURL = canvas.toDataURL();
-  console.log(imgURL);
+  //console.log(imgURL);
 
   $.ajax({
       type: "GET",
@@ -63,9 +63,9 @@ function takePic() {
       data:{
         imageBase64: imgURL
       }
-    }).done(function() {
+    })/*.done(function() {
       console.log('sent');
-    });
+    });*/
 }
 
 
