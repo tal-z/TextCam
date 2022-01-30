@@ -31,18 +31,16 @@ def img2text(img):
     }
     img = img.convert('L')
     greyscale_data = list(img.getdata())
-    return [ascii_scale[10-max(int(val // 25),0)] for val in greyscale_data]
+    return [ascii_scale[10-max(int(val // 25), 0)] for val in greyscale_data]
 
 
 def format_html(data, size):
-    w = size[0]
-    h = size[1]
+    w, h = size
     string = ''
     start, end = 0, w
-    for row in range(h):
-        string = string + "<br>"
-        string += ''.join([str(item)+" " for item in data[start:end]])
-        start += w
+    while end <= len(data):
+        string += ''.join(data[start:end]) + '<br>'
+        start = end
         end += w
     return string
 
