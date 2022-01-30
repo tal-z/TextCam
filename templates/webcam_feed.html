@@ -6,19 +6,40 @@
     <style>
         body {
             font-family: monospace;
-            text-align: justify;
+            text-align: center;
+            font-size: .25vw;
+            transform:scale(2.0,1.0);
         }
     </style>
 </head>
 <body>
-        {{ html|safe }}
+<div id="ascii-stream">{{ html|safe }}</div>
 </body>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script>
     var intervalID =  setInterval(reload, 1000/{{ FPS }});
+    const stream = document.getElementById('ascii-stream');
+    let shot_idx = 0
 
     function reload() {
-        window.location.reload();
-    }
+        var call = $.ajax({
+            dataType: "json",
+            url: '/webcam_feed_json/' + shot_idx,
+            data: '{{ html }}',
+        });
+
+        //Listening to completion
+        call.done(function(data){
+          //console.log(data.html);
+          //console.log(stream);
+          stream.innerHTML = data.html;
+        });
+        shot_idx += 1;
+        }
+
+
+
+
 </script>
 
 </html>
