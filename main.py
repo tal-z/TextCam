@@ -9,9 +9,7 @@ app = Flask(__name__)
 
 default_img = r"C:\Users\PC\Pictures\bat_signal.png"
 
-FPS = 32
-
-shot_idx = 0
+FPS = 64
 html_shots = []
 
 @app.route("/webcam2text")
@@ -25,18 +23,24 @@ def webcam2text():
     text = img2text(img)
     html = format_html(text, img.size)
     html_shots.append(html)
-    return Response(200)
+    print("html_shots:", len(html_shots)-1)
+    return jsonify(success=True)
+
 
 
 @app.route("/webcam_feed/")
 def webcam_feed():
-    global html_shots
     if not html_shots:
         return render_template('webcam_feed.html', html="No Live Feed", FPS=FPS)
-    global shot_idx
-    html_shots = [html_shots.pop()]
-    html = html_shots
+    html = html_shots[-1]
     return render_template('webcam_feed.html', html=html, FPS=FPS)
+
+@app.route("/webcam_feed_json/<shot_idx>")
+def webcam_feed_json(shot_idx):
+    print("shot_idx:", shot_idx)
+    html = html_shots[int(shot_idx)]
+    return jsonify({'html': html})
+
 
 
 
@@ -50,12 +54,14 @@ def webcam():
     return render_template('webcam.html', FPS=FPS)
 
 
+
+
 @app.route("/image2text")
 def image2text():
     filepath = request.args.get('filepath') or default_img
     print(filepath)
     img = get_pillow_img(filepath)
-    img.thumbnail((200,200))
+    img.thumbnail((100,100))
     text = img2text(img)
     html = format_html(text, img.size)
     return render_template('image2text.html', html=html)
@@ -64,4 +70,4 @@ def image2text():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True)
+    app.run(debug=True)
