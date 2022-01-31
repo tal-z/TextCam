@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 default_img = r"C:\Users\PC\Pictures\bat_signal.png"
 
-FPS = 32
+FPS = 24
 html_shots = []
 
 @app.route("/webcam2text", methods=['POST'])

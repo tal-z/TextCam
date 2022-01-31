@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" minimum-scale="1", user-scalable=no"/>
     <title>Title</title>
     <style>
         body {
             font-family: monospace;
             text-align: center;
-            font-size: .25vw;
+            //font-size: .25vw;
             transform:scale(2.0,1.0);
         }
     </style>
@@ -19,9 +20,7 @@
 <script>
     var updateFrame_interval =  setInterval(updateFrame, 1000/{{ FPS }});
     var reload_interval =  setInterval(reload, 1000);
-
     let frames = []
-
     const stream = document.getElementById('ascii-stream');
 
     async function reload() {
@@ -34,8 +33,8 @@
 
         //Listening to completion
         call.done(function(data){
-          //stream.innerHTML = data.html;
-          frames = frames.concat(data.html_burst);
+          //frames = frames.concat(data.html_burst);
+          frames = data.html_burst;
         });
         }
 
@@ -44,9 +43,6 @@
         if (frames.length > 1) {
             var frame = frames.shift();
             stream.innerHTML = frame;
-        }
-        if (frames.length > {{ FPS }}) {
-            frames = frames.slice({{ FPS }}*-1);
         }
     }
 
