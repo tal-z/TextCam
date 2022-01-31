@@ -19,7 +19,7 @@
 <script>
     var intervalID =  setInterval(reload, 1000/{{ FPS }});
     const stream = document.getElementById('ascii-stream');
-    let shot_idx = 0
+    let shot_idx = 0;
 
     function reload() {
         var call = $.ajax({
@@ -30,11 +30,9 @@
 
         //Listening to completion
         call.done(function(data){
-          //console.log(data.html);
-          //console.log(stream);
           stream.innerHTML = data.html;
         });
-        shot_idx += 1;
+        shot_idx += 1
         }
 
 

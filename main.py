@@ -3,17 +3,18 @@ import base64
 
 from flask import Flask, render_template, request, redirect, url_for, Response, jsonify
 from image2text import *
-
+import json
 
 app = Flask(__name__)
 
 default_img = r"C:\Users\PC\Pictures\bat_signal.png"
 
-FPS = 64
+FPS = 32
 html_shots = []
 
-@app.route("/webcam2text")
+@app.route("/webcam2text", methods=['POST'])
 def webcam2text():
+    print('hit route')
     filepath = request.args.get('imageBase64') or default_img
     content = filepath.split(';')[1]
     image_encoded = content.split(',')[1]
@@ -27,31 +28,57 @@ def webcam2text():
     return jsonify(success=True)
 
 
+@app.route("/webcam2text_burst", methods=['POST'])
+def webcam2text_burst():
+    global html_shots
+    html_shots = html_shots[FPS-1:]
+    images = request.form.getlist("imageBase64")
+    for image in images[0].split(','):
+        try:
+            image_encoded = image
+            shot = base64.decodebytes(image_encoded.encode('utf-8'))
+            img = Image.open(BytesIO(shot))
+            img.thumbnail((200,200))
+            text = img2text(img)
+            html = format_html(text, img.size)
+            html_shots.append(html)
+            print("html_shots:", len(html_shots)-1)
+        except:
+            print("EXCEPTION ON:", image)
+    return jsonify(success=True)
+
 
 @app.route("/webcam_feed/")
 def webcam_feed():
     if not html_shots:
         return render_template('webcam_feed.html', html="No Live Feed", FPS=FPS)
-    html = html_shots[-1]
+    try:
+        html = html_shots.leftpop()
+    except:
+        html = html_shots[-1]
     return render_template('webcam_feed.html', html=html, FPS=FPS)
+
 
 @app.route("/webcam_feed_json/<shot_idx>")
 def webcam_feed_json(shot_idx):
-    print("shot_idx:", shot_idx)
-    html = html_shots[int(shot_idx)]
+    print("shot index:", shot_idx)
+    try:
+        html = html_shots.leftpop()
+    except:
+        html = html_shots[-1]
     return jsonify({'html': html})
 
 
 
 
-@app.route('/view_webcam')
-def view_webcam():
-    return render_template('view_webcam.html', FPS=FPS)
+@app.route('/viewer')
+def viewer():
+    return render_template('viewer.html', FPS=FPS)
 
 
-@app.route("/webcam")
-def webcam():
-    return render_template('webcam.html', FPS=FPS)
+@app.route("/recorder")
+def recorder():
+    return render_template('recorder.html', FPS=FPS)
 
 
 
@@ -70,4 +97,4 @@ def image2text():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)

@@ -50,24 +50,32 @@ function drawToCanvas() {
   canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
 };
 
-var intervalID =  setInterval(drawToCanvas, 2* (1000/{{ FPS }}));
+var intervalID =  setInterval(drawToCanvas, (1000/{{ FPS }}));
 
-
+let pixArray = [];
+let frameCount = 0;
 function takePic() {
   var imgURL = canvas.toDataURL();
-  //console.log(imgURL);
+  pixArray.push(imgURL);
+  frameCount += 1;
+  if (frameCount === {{ FPS }}) {
+      send_frames(pixArray);
+      pixArray = [];
+      frameCount = 0;
+  };
+}
 
-  $.ajax({
-      type: "GET",
-      url: "/webcam2text?filepath=",
+async function send_frames(arr) {
+    $.ajax({
+      type: "POST",
+      url: "/webcam2text_burst",
       data:{
-        imageBase64: imgURL
+        imageBase64: JSON.stringify(arr)
       }
     })/*.done(function() {
       console.log('sent');
-    });*/
-}
-
+    })*/;
+};
 
 
 
