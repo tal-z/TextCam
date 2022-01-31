@@ -3,7 +3,6 @@ import base64
 
 from flask import Flask, render_template, request, redirect, url_for, Response, jsonify
 from image2text import *
-import json
 
 app = Flask(__name__)
 
@@ -31,20 +30,20 @@ def webcam2text():
 @app.route("/webcam2text_burst", methods=['POST'])
 def webcam2text_burst():
     global html_shots
-    html_shots = html_shots[FPS-1:]
-    images = request.form.getlist("imageBase64")
+    images = request.form.getlist("image_data")
     for image in images[0].split(','):
         try:
             image_encoded = image
             shot = base64.decodebytes(image_encoded.encode('utf-8'))
             img = Image.open(BytesIO(shot))
-            img.thumbnail((200,200))
+            img.thumbnail((200, 200))
             text = img2text(img)
             html = format_html(text, img.size)
             html_shots.append(html)
-            print("html_shots:", len(html_shots)-1)
+            #print("html_shots:", len(html_shots)-1)
         except:
-            print("EXCEPTION ON:", image)
+            pass
+            #print("EXCEPTION ON:", image)
     return jsonify(success=True)
 
 
@@ -59,15 +58,25 @@ def webcam_feed():
     return render_template('webcam_feed.html', html=html, FPS=FPS)
 
 
-@app.route("/webcam_feed_json/<shot_idx>")
-def webcam_feed_json(shot_idx):
-    print("shot index:", shot_idx)
+@app.route("/webcam_feed_json")
+def webcam_feed_json():
     try:
         html = html_shots.leftpop()
     except:
         html = html_shots[-1]
     return jsonify({'html': html})
 
+
+last = 0
+@app.route("/webcam_feed_json_burst")
+def webcam_feed_json_burst():
+    global html_shots
+    try:
+        html_shots = html_shots[-FPS:]
+        print("tried successfully", len(html_shots))
+    except:
+        print('failed exceptionally')
+    return jsonify({'html_burst': html_shots})
 
 
 

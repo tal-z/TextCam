@@ -66,11 +66,11 @@ function takePic() {
 }
 
 async function send_frames(arr) {
-    $.ajax({
+    await $.ajax({
       type: "POST",
       url: "/webcam2text_burst",
       data:{
-        imageBase64: JSON.stringify(arr)
+        image_data: JSON.stringify(arr)
       }
     })/*.done(function() {
       console.log('sent');

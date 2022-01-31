@@ -17,23 +17,38 @@
 </body>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script>
-    var intervalID =  setInterval(reload, 1000/{{ FPS }});
-    const stream = document.getElementById('ascii-stream');
-    let shot_idx = 0;
+    var updateFrame_interval =  setInterval(updateFrame, 1000/{{ FPS }});
+    var reload_interval =  setInterval(reload, 1000);
 
-    function reload() {
+    let frames = []
+
+    const stream = document.getElementById('ascii-stream');
+
+    async function reload() {
         var call = $.ajax({
             dataType: "json",
-            url: '/webcam_feed_json/' + shot_idx,
-            data: '{{ html }}',
+            //url: '/webcam_feed_json',
+            url: '/webcam_feed_json_burst',
+            data: '{{ html_burst }}',
         });
 
         //Listening to completion
         call.done(function(data){
-          stream.innerHTML = data.html;
+          //stream.innerHTML = data.html;
+          frames = frames.concat(data.html_burst);
         });
-        shot_idx += 1
         }
+
+    async function updateFrame() {
+        console.log(frames.length);
+        if (frames.length > 1) {
+            var frame = frames.shift();
+            stream.innerHTML = frame;
+        }
+        if (frames.length > {{ FPS }}) {
+            frames = frames.slice({{ FPS }}*-1);
+        }
+    }
 
 
 
