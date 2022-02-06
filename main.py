@@ -11,6 +11,7 @@ default_img = r"C:\Users\PC\Pictures\bat_signal.png"
 FPS = 24
 html_shots = []
 
+
 @app.route("/webcam2text", methods=['POST'])
 def webcam2text():
     print('hit route')
@@ -29,9 +30,8 @@ def webcam2text():
 
 @app.route("/webcam2text_burst", methods=['POST'])
 def webcam2text_burst():
-    global html_shots
     images = request.form.getlist("image_data")
-    for image in images[0].split(','):
+    for image in images[0].split(',')[1::2]:
         try:
             image_encoded = image
             shot = base64.decodebytes(image_encoded.encode('utf-8'))
@@ -51,10 +51,7 @@ def webcam2text_burst():
 def webcam_feed():
     if not html_shots:
         return render_template('webcam_feed.html', html="No Live Feed", FPS=FPS)
-    try:
-        html = html_shots.leftpop()
-    except:
-        html = html_shots[-1]
+    html = html_shots.pop(0)
     return render_template('webcam_feed.html', html=html, FPS=FPS)
 
 
@@ -67,16 +64,14 @@ def webcam_feed_json():
     return jsonify({'html': html})
 
 
-last = 0
+
 @app.route("/webcam_feed_json_burst")
 def webcam_feed_json_burst():
     global html_shots
-    try:
+    if not html_shots == html_shots[-FPS:]:
         html_shots = html_shots[-FPS:]
-        print("tried successfully", len(html_shots))
-    except:
-        print('failed exceptionally')
-    return jsonify({'html_burst': html_shots})
+        return jsonify({'html_burst': html_shots})
+    return jsonify(success=False)
 
 
 
@@ -89,6 +84,10 @@ def viewer():
 def recorder():
     return render_template('recorder.html', FPS=FPS)
 
+
+@app.route("/")
+def index():
+    return render_template('welcome.html')
 
 
 
