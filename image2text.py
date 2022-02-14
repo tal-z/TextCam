@@ -4,7 +4,6 @@ from io import BytesIO
 import requests
 from PIL import Image
 
-
 def get_pillow_img(filepath):
     if not filepath[:4] == 'http':
         img = Image.open(filepath)
@@ -44,6 +43,21 @@ def format_html(data, size):
         end += w
     return string
 
+
+def to_gif(images, save_filepath):
+    """
+    Takes an iterable of PIL image objects, and saves them as a GIF at a specified location.
+
+    https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#gif
+
+    :param images: -> iterable of Pillow Image objects
+    :param save_filepath: -> string
+    :return: None
+    """
+
+    img, *imgs = images
+    img.save(fp=save_filepath, format='GIF', append_images=imgs,
+             save_all=True, duration=30, loop=0)
 
 if __name__ == '__main__':
     filepath = r"C:\Users\PC\Pictures\peppers.jpg"
